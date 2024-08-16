@@ -18,7 +18,7 @@ local run_script = function(cmd, code)
 	return pandoc.system.with_temporary_directory("panwalk", function(tmpdir)
 		local tmpfile = pandoc.path.join({ tmpdir, "panwalk.sh" })
 		assert(assert(io.open(tmpfile, "w")):write(code.text)):close()
-		local prog = string.format("%s %s", cmd, tmpfile)
+		local prog = string.format(cmd, tmpfile)
 		local handle = assert(io.popen(prog == cmd and (cmd .. " " .. tmpfile) or prog))
 		local result = handle:read("*a")
 		handle:close()
@@ -82,7 +82,15 @@ local function process_code(el)
 	end
 
 	env.ctx.self = el
-	local result = env.ctx.opts.engines[el.classes[1]](el, env)
+
+	local f = env.ctx.opts.engines[el.classes[1]]
+	local result
+	if type(f) == "function" then
+		result = f(el, env)
+	else
+		result = run_script(f, el)
+	end
+
 	if result == nil then
 		return {}
 	end
