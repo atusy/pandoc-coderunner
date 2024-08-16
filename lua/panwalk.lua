@@ -14,8 +14,36 @@ local function protect(v)
 	return setmetatable({}, m)
 end
 
+local run_script = function(cmd, code)
+	return pandoc.system.with_temporary_directory("panwalk", function(tmpdir)
+		local tmpfile = pandoc.path.join({ tmpdir, "panwalk.sh" })
+		assert(assert(io.open(tmpfile, "w")):write(code.text)):close()
+		local prog = string.format("%s %s", cmd, tmpfile)
+		local handle = assert(io.popen(prog == cmd and (cmd .. " " .. tmpfile) or prog))
+		local result = handle:read("*a")
+		handle:close()
+		return result
+	end)
+end
+
 --- Environment where code is evaluated
-local env = setmetatable({ ctx = {} }, {
+local env = setmetatable({
+	ctx = {
+		opts = {
+			engines = setmetatable({
+				lua = function(code, environment)
+					return assert(load(code.text, code.identifier, "t", environment))()
+				end,
+			}, {
+				__index = function(_, cmd)
+					return function(code)
+						return run_script(cmd, code)
+					end
+				end,
+			}),
+		},
+	},
+}, {
 	__index = function(_, key)
 		return protect(_G[key])
 	end,
@@ -53,7 +81,7 @@ local function process_code(el)
 	end
 
 	env.ctx.self = el
-	local result = assert(load(el.text, el.identifier, "t", env))()
+	local result = env.ctx.opts.engines[el.classes[1]](el, env)
 	if result == nil then
 		return {}
 	end
