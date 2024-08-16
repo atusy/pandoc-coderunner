@@ -41,6 +41,7 @@ local env = setmetatable({
 					end
 				end,
 			}),
+			eval = {},
 		},
 	},
 }, {
@@ -62,7 +63,7 @@ local function needs_eval(el)
 		return true
 	end
 
-	local o = env.ctx.meta.options or {}
+	local o = env.ctx.opts
 	if not o.eval then
 		return false
 	end
