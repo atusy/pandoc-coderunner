@@ -95,7 +95,7 @@ local function process_code(el)
 		return {}
 	end
 
-	if type(result) == "table" then
+	if ({ table = true, userdata = true })[type(result)] then
 		return result
 	end
 
