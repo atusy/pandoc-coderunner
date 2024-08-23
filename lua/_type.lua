@@ -1,0 +1,22 @@
+---@class CoderunnerContext
+---@field opts CoderunnerOpts
+---@field self userdata pandoc.CodeBlock or pandoc.Code of which the content is under the evaluation
+---@field meta userdata Metadata of the input document represented as Pandoc's AST
+---@field blocks userdata Blocks of the input document represented as Pandoc's AST
+
+---@class CoderunnerOpts
+---@field engines CoderunnerEngine
+---@field eval table<string, boolean> If the value is true, then CodeBlocks/Codes with the corresponding class name are evaluated without specifying `.eval=true`. "." is the special key that applies to all CodeBlocks/Codes.
+
+---@class CoderunnerEngine: table<string, nil | string | function(el: pandoc.CodeBlock | pandoc.Code, ctx: CoderunnerContext): pandoc.Block | pandoc.Inline | string | nil>
+---
+---A table that defines how the CodeBlocks/Codes are evaluated.
+---
+---If the value is function, the function receives CodeBlock/Code and CoderunnerContext as arguments and returns a Block/Inline or string.
+---
+---If the value is string, the string is evaluated with a temporary file that contains the code text.
+---If the string value contains `%s`, then this is replaced with a path to the temporary file.
+---Otherwise, the path is appended to the string.
+---The stdout from the evaluation becomes the result of the evaluation.
+---
+---If the value is nil, then the key string is considered as the value.
