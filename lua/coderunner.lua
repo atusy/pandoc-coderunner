@@ -14,7 +14,7 @@ local function protect(v)
 	return setmetatable({}, m)
 end
 
-local run_script = function(cmd, code)
+local function run_script(cmd, code)
 	return pandoc.system.with_temporary_directory("panwalk", function(tmpdir)
 		local tmpfile = pandoc.path.join({ tmpdir, "panwalk.sh" })
 		assert(assert(io.open(tmpfile, "w")):write(code.text)):close()
