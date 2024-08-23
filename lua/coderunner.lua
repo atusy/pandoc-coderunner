@@ -31,8 +31,8 @@ local env = setmetatable({
 	ctx = {
 		opts = {
 			engines = setmetatable({
-				lua = function(code, environment)
-					return assert(load(code.text, code.identifier, "t", environment))()
+				lua = function(code, ctx)
+					return assert(load(code.text, code.identifier, "t", ctx))()
 				end,
 			}, {
 				__index = function(_, cmd)
